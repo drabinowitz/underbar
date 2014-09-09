@@ -467,23 +467,39 @@ var _ = {};
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
 
+  	var iteratorStr;
+
+  	if (typeof iterator !== 'function'){
+
+  		iteratorStr = iterator;
+
+  		iterator = function(value){
+
+  			return value[iteratorStr];
+
+  		};
+
+  	}
+
   	var result = [];
 
   	_.each(collection,function(value){
 
-		if (result.length === 0){
+		var indexOf = _.reduce(result,function(currentIndex,resultVal){
 
-			result.push(value);
+			if(currentIndex < result.length || !iterator(value) || iterator(value) >= iterator(resultVal)){
 
-		} else {
+				return currentIndex;
 
-			var indexOf = _.reduce(result,function(value,index){
+			} else {
 
+				return result.indexOf(resultVal);
 
+			}
 
-			},0);
+		},result.length);
 
-		}
+		result.splice(indexOf,0,value);
 
   	});
 
@@ -497,6 +513,39 @@ var _ = {};
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+
+  	var result = [];
+
+  	var zipArgs = Array.prototype.slice.call(arguments);
+
+  	var longestArray = _.reduce(zipArgs,function(currentLongest,currentArray){
+
+  		if( currentArray.length > currentLongest.length){
+
+  			return currentArray;
+
+  		}
+
+  		return currentLongest;
+
+  	},[]);
+
+  	_.each(longestArray,function(value,key){
+
+  		var zipRow = [];
+
+  		_.each(zipArgs,function(value){
+
+  			zipRow.push(value[key]);
+
+  		});
+
+  		result.push(zipRow);
+
+  	});
+
+  	return result;
+
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
@@ -504,11 +553,49 @@ var _ = {};
   //
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
+
+  	result = result || [];
+
+  	_.each(nestedArray,function(value){
+
+  		if (Array.isArray(value)){
+
+  			_.flatten(value,result);
+
+  		} else {
+
+  			result.push(value);
+
+  		}
+
+  	});
+
+  	return result;
+
   };
 
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
+
+  	var result = [];
+
+  	_.each(arguments[0],function(value){
+
+  		if(_.every(arguments,function(item){
+
+  			return _.contains(item,value);
+
+  		})){
+
+  			result.push(value);
+
+  		}
+
+  	});
+
+  	return result;
+
   };
 
   // Take the difference between one array and a number of other arrays.
