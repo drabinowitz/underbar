@@ -578,11 +578,13 @@ var _ = {};
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
 
+  	var funcArgs = Array.prototype.slice.call(arguments);
+
   	var result = [];
 
-  	_.each(arguments[0],function(value){
+  	_.each(funcArgs.shift(),function(value){
 
-  		if(_.every(arguments,function(item){
+  		if(_.every(funcArgs,function(item){
 
   			return _.contains(item,value);
 
@@ -601,6 +603,27 @@ var _ = {};
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
+
+  	var funcArgs = Array.prototype.slice.call(arguments);
+
+  	var result = [];
+
+  	_.each(funcArgs.shift(),function(value){
+
+  		if(_.every(funcArgs,function(item){
+
+  			return !_.contains(item,value);
+
+  		})){
+
+  			result.push(value);
+
+  		}
+
+  	});
+
+  	return result;  	
+
   };
 
 
@@ -614,6 +637,43 @@ var _ = {};
   //
   // See the Underbar readme for details.
   _.throttle = function(func, wait) {
+
+  	var timeoutId;
+
+  	var scheduled = false;
+
+  	var result;
+
+  	return function throttledFunction (){
+
+  		if (typeof timeoutId === 'undefined'){
+
+			timeoutId = setTimeout(function(){
+
+				timeoutId = undefined;
+
+				if (scheduled === true){
+
+					result = throttledFunction.apply(this,arguments);
+
+					scheduled = false;
+
+				}
+		
+			},wait);
+
+			result = func.apply(this,arguments);
+
+  		} else {
+
+  			scheduled = true;
+
+  		}
+
+		return result;
+  	
+  	};
+
   };
 
 }).call(this);
